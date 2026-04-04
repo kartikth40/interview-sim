@@ -49,7 +49,7 @@ graph TD
     R --> U[Offer Follow-Up Problem]
     R --> V[Offer Optimal Walkthrough via !optimal]
     
-    S --> W[session-replays/*.md]
+    S --> W[src/session-replays/*.md]
     T --> X[weakness-log.md]
 ```
 
@@ -167,7 +167,7 @@ sequenceDiagram
 
 A persistent markdown file that accumulates weakness data across sessions.
 
-### Component 4: Session Replay Files (`.kiro/specs/dsa-mock-interviewer/session-replays/*.md`)
+### Component 4: Session Replay Files (`src/session-replays/*.md`)
 
 Per-session markdown summaries written after each debrief.
 

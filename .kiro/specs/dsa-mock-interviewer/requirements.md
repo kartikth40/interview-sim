@@ -376,7 +376,7 @@ The DSA Mock Interviewer is a Kiro-native feature that turns Kiro's built-in AI 
 
 #### Acceptance Criteria
 
-1. AFTER the Debrief is complete, THE Interviewer SHALL generate a Session_Replay as a markdown file saved to `.kiro/specs/dsa-mock-interviewer/session-replays/`.
+1. AFTER the Debrief is complete, THE Interviewer SHALL generate a Session_Replay as a markdown file saved to `src/session-replays/`.
 2. THE Session_Replay file SHALL be named with the format `{date}-{problem-title-kebab-case}.md` (e.g., `2026-04-04-two-sum.md`).
 3. THE Session_Replay SHALL include: the session date, mode (Practice or Mock), target company (if selected), problem title and statement, the Candidate's stated approach, key decisions and pivots made during the session, mistakes and corrections, all hint requests and responses, JS_Pitfalls detected, the full Debrief scores, the overall verdict, and the Pace_Report.
 4. THE Session_Replay SHALL be concise — no more than 150 lines — summarising the session flow rather than reproducing the full chat transcript.

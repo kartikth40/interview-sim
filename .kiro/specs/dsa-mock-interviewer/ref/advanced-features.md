@@ -171,7 +171,7 @@ Selection priority: (1) cases likely to break Candidate's specific code, (2) com
 
 ## Session Replay
 
-Save to `.kiro/specs/dsa-mock-interviewer/session-replays/{date}-{title-kebab}.md`
+Save to `src/session-replays/{date}-{title-kebab}.md`
 Multi-round: `{date}-multi-round.md`
 
 Filename: date YYYY-MM-DD + title lowercase kebab-case (replace non-alphanumeric with hyphens, collapse, trim).
