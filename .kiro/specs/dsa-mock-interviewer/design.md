@@ -1,0 +1,522 @@
+# Design Document: DSA Mock Interviewer
+
+## Overview
+
+The DSA Mock Interviewer is a Kiro-native feature that transforms Kiro's AI into a FAANG-level technical interviewer. It operates entirely within Kiro's chat interface using two core Kiro primitives:
+
+1. A **steering file** (`.kiro/steering/dsa-interviewer.md`) that defines the Interviewer persona, session rules, phase logic, scoring rubrics, and all behavioural instructions.
+2. A **user-triggered hook** (`.kiro/hooks/start-mock-interview.md`) that initialises a session by collecting Candidate preferences and launching the interview flow.
+
+There is no application code, no backend, no React. The steering file is always active in Kiro chat, shaping every response. The hook is a one-shot trigger that kicks off the session initialisation sequence. All session state (current phase, hint count, JS pitfalls detected, timer, etc.) is maintained conversationally by the Interviewer within the chat context. Persistent data (weakness log, session replays) is written to markdown files on disk.
+
+### Key Design Decisions
+
+- **Single steering file**: All persona rules, phase definitions, scoring rubrics, company profiles, pitfall lists, and anti-pattern detection rules live in one steering file. This keeps the Interviewer's behaviour atomic and avoids fragmentation across multiple files.
+- **Conversational state management**: Session state (phase, hint count, timer, pitfalls) is tracked within the chat context rather than in external files. This is the natural model for Kiro steering — the AI maintains context across turns.
+- **Persistent files for cross-session data only**: The weakness log and session replays are the only files written to disk, because they need to survive across sessions.
+- **Hook as session bootstrapper**: The hook collects all session parameters (mode, company, topic, personality, difficulty progression, candidate problem) in a structured flow, then hands off to the steering file's phase logic.
+
+---
+
+## Architecture
+
+The feature has two Kiro-native components and two persistent file stores:
+
+```mermaid
+graph TD
+    A[Candidate triggers Hook] --> B[Hook: start-mock-interview.md]
+    B --> C{Collect Session Parameters}
+    C --> D[Mode: Practice / Mock]
+    C --> E[Company: Google / Meta / Amazon / Microsoft / Apple / Random]
+    C --> F[Topic: Arrays / DP / Graphs / Trees / etc.]
+    C --> G[Personality: Friendly / Neutral / Tough]
+    C --> H[Format: Single / Multi-Round]
+    C --> I[Candidate Problem Mode?]
+    C --> J[Difficulty Progression?]
+    C --> K[Timer: 20 / 35 / 45 min]
+    
+    D & E & F & G & H & I & J & K --> L[Steering File: dsa-interviewer.md]
+    
+    L --> M[Phase 1: Clarification]
+    M --> N[Phase 2: Approach]
+    N --> O[Phase 3: Coding]
+    O --> P[Phase 4: Edge Case Challenge]
+    P --> Q[Phase 5: Dry Run]
+    Q --> R[Phase 6: Debrief]
+    
+    R --> S[Write Session Replay]
+    R --> T[Update Weakness Log]
+    R --> U[Offer Follow-Up Problem]
+    R --> V[Offer Optimal Walkthrough via !optimal]
+    
+    S --> W[session-replays/*.md]
+    T --> X[weakness-log.md]
+```
+
+### Component Interaction Flow
+
+1. **Candidate triggers the hook** → Hook prompts for session parameters in sequence.
+2. **Parameters collected** → Hook instructs the Interviewer (via steering file) to generate/accept a problem and begin the Clarification phase.
+3. **Steering file drives all six phases** → Each phase has entry/exit conditions, behavioural rules, and transition logic defined in the steering file.
+4. **Debrief completes** → Steering file instructs the Interviewer to write the session replay file, update the weakness log, and offer follow-up/optimal walkthrough.
+
+---
+
+## Components and Interfaces
+
+### Component 1: Steering File (`.kiro/steering/dsa-interviewer.md`)
+
+This is the core component. It defines everything the Interviewer needs to behave correctly.
+
+#### Sections within the Steering File
+
+| Section | Purpose | Requirements Covered |
+|---|---|---|
+| **Persona Definition** | SDE-2 FAANG interviewer identity, Socratic style, no-solution-giving rule | Req 1.1, 1.2, 1.7 |
+| **Session Modes** | Practice_Mode vs Mock_Mode behavioural differences | Req 1.5, 1.6, 4.3, 4.4, 15.5 |
+| **Phase Definitions** | Six phases with entry/exit conditions and transition rules | Req 1.3, 3.1–3.11 |
+| **Hint System Rules** | `!hint` command, Socratic nudges, mode-specific limits, progressive hints | Req 4.1–4.5 |
+| **Pushback Rules** | When and how to challenge the Candidate | Req 5.1–5.5 |
+| **JS Pitfall Detection** | List of pitfalls, detection rules, flagging behaviour | Req 6.1–6.4 |
+| **Timer Rules** | Mock_Mode timer logic, reminders, expiry behaviour | Req 7.1–7.5 |
+| **Debrief Rubric** | Six scoring dimensions, verdict logic, pace report, anti-pattern summary | Req 8.1–8.8 |
+| **Company Profiles** | Per-company topic preferences and evaluation emphasis | Req 9.1–9.6 |
+| **State Tracking Rules** | Phase tracking, hint count, pitfall count, approach reference | Req 10.1–10.5 |
+| **Follow-Up Problem Rules** | When to offer, condensed session format, constraint escalation | Req 11.1–11.5 |
+| **Think Aloud Evaluation** | Sub-criteria, prompting rules, silent coding detection | Req 12.1–12.5 |
+| **Dry Run Rules** | Test input generation, variable tracing, discrepancy detection | Req 13.1–13.7 |
+| **Pattern Recognition** | Post-debrief pattern identification, similar problem suggestions | Req 14.1–14.5 |
+| **Communication Anti-Pattern Detection** | Anti-pattern list, real-time vs debrief-only flagging by mode | Req 15.1–15.5 |
+| **Candidate Problem Mode** | Validation rules for user-provided problems | Req 16.1–16.5 |
+| **Multi-Round Session** | Three-round structure, per-round debrief, cumulative debrief | Req 17.1–17.6 |
+| **Weakness Log Integration** | Read on session start, write after debrief, recurring weakness detection | Req 18.1–18.5 |
+| **Optimal Solution Walkthrough** | `!optimal` command, pre-debrief guard, divergence analysis | Req 19.1–19.5 |
+| **Pace Coaching** | Phase timing tracking, benchmark comparison, over/under flags | Req 20.1–20.5 |
+| **Difficulty Progression** | Adaptive difficulty rules based on past verdicts and hint usage | Req 21.1–21.6 |
+| **Edge Case Challenge Rules** | 3-4 edge cases, prediction-first format, accuracy scoring | Req 22.1–22.7 |
+| **Session Replay Generation** | Post-debrief file generation, naming convention, content structure | Req 23.1–23.5 |
+| **Interviewer Personality** | Three personality variants, tone rules, consistency requirement | Req 24.1–24.7 |
+| **Special Commands** | `!hint`, `!reveal`, `!optimal`, `!restart` command definitions | Req 1.2, 4.2, 10.4, 19.1 |
+
+### Component 2: Hook (`.kiro/hooks/start-mock-interview.md`)
+
+The hook is a user-triggered Kiro hook that bootstraps a session.
+
+#### Hook Structure
+
+```markdown
+---
+trigger: user
+description: Start a DSA mock interview session
+---
+
+## Instructions
+
+1. Read the weakness log at `.kiro/specs/dsa-mock-interviewer/weakness-log.md` if it exists.
+2. Prompt the Candidate to select:
+   a. Session mode: Practice_Mode or Mock_Mode
+   b. Session format: Single session or Multi_Round_Session
+   c. Problem source: Interviewer-generated or Candidate_Problem_Mode
+   d. Target company: Google, Meta, Amazon, Microsoft, Apple, or Random (optional)
+   e. Topic: Arrays, DP, Graphs, Trees, Strings, Linked Lists, Backtracking, Heap, or Random (optional)
+   f. Interviewer personality: Friendly, Neutral, or Tough (default: Neutral)
+   g. Difficulty Progression: On or Off (default: Off)
+   h. Timer duration (Mock_Mode only): 20, 35, or 45 minutes
+3. If Candidate_Problem_Mode is selected, prompt the Candidate to paste the problem.
+4. If Difficulty_Progression is On, read the weakness log to determine the appropriate difficulty level.
+5. Begin the session by generating/accepting the problem and entering the Clarification phase.
+```
+
+#### Hook Parameter Collection Flow
+
+```mermaid
+sequenceDiagram
+    participant C as Candidate
+    participant H as Hook
+    participant S as Steering File
+
+    C->>H: Trigger hook
+    H->>C: Select session mode?
+    C->>H: Practice / Mock
+    H->>C: Single or Multi-Round?
+    C->>H: Single / Multi-Round
+    H->>C: Provide your own problem?
+    C->>H: Yes / No
+    alt Candidate Problem Mode
+        H->>C: Paste problem statement
+        C->>H: [problem text]
+        H->>S: Validate problem, begin session
+    else Interviewer Generated
+        H->>C: Target company? (optional)
+        C->>H: [company or skip]
+        H->>C: Topic? (optional)
+        C->>H: [topic or skip]
+    end
+    H->>C: Interviewer personality?
+    C->>H: Friendly / Neutral / Tough
+    alt Mock Mode
+        H->>C: Timer duration?
+        C->>H: 20 / 35 / 45 min
+    end
+    H->>C: Difficulty Progression on?
+    C->>H: On / Off
+    H->>S: All parameters collected, begin Clarification phase
+```
+
+### Component 3: Weakness Log File (`.kiro/specs/dsa-mock-interviewer/weakness-log.md`)
+
+A persistent markdown file that accumulates weakness data across sessions.
+
+### Component 4: Session Replay Files (`.kiro/specs/dsa-mock-interviewer/session-replays/*.md`)
+
+Per-session markdown summaries written after each debrief.
+
+---
+
+## Data Models
+
+### Session Parameters (Collected by Hook)
+
+| Parameter | Type | Values | Default | Required |
+|---|---|---|---|---|
+| `mode` | enum | `Practice`, `Mock` | — | Yes |
+| `format` | enum | `Single`, `MultiRound` | `Single` | Yes |
+| `problemSource` | enum | `Generated`, `CandidateProvided` | `Generated` | Yes |
+| `company` | enum | `Google`, `Meta`, `Amazon`, `Microsoft`, `Apple`, `Random` | `Random` | No |
+| `topic` | enum | `Arrays`, `DP`, `Graphs`, `Trees`, `Strings`, `LinkedLists`, `Backtracking`, `Heap`, `Random` | `Random` | No |
+| `personality` | enum | `Friendly`, `Neutral`, `Tough` | `Neutral` | No |
+| `difficultyProgression` | boolean | `On`, `Off` | `Off` | No |
+| `timerDuration` | enum | `20`, `35`, `45` (minutes) | — | Mock only |
+
+### Session State (Maintained in Chat Context)
+
+| Field | Type | Description |
+|---|---|---|
+| `currentPhase` | enum | One of: `Clarification`, `Approach`, `Coding`, `EdgeCaseChallenge`, `DryRun`, `Debrief` |
+| `hintCount` | integer | Running count of `!hint` commands used |
+| `jsPitfallsDetected` | list | Each entry: `{line, pitfallCategory, corrected: boolean}` |
+| `communicationAntiPatterns` | list | Each entry: `{type, count}` |
+| `phaseTimings` | map | Phase name → approximate duration |
+| `candidateApproach` | text | The Candidate's stated approach (for reference in pushbacks) |
+| `problemTitle` | text | Title of the current problem |
+| `problemDifficulty` | enum | `Easy`, `Medium`, `Hard` |
+| `edgeCaseResults` | list | Each entry: `{edgeCase, candidatePrediction, correct: boolean}` |
+| `dryRunAccurate` | boolean | Whether the Candidate's trace matched code behaviour |
+
+### Problem Format (Generated or Validated)
+
+```markdown
+## [Problem Title]
+**Difficulty:** Easy / Medium / Hard
+**Topics:** [Array, DP, etc.]
+**Company Tag:** [Google, Meta, etc. — if applicable]
+
+### Problem Statement
+[Clear description of the problem]
+
+### Examples
+**Example 1:**
+- Input: [input]
+- Output: [output]
+- Explanation: [explanation]
+
+**Example 2:**
+- Input: [input]
+- Output: [output]
+- Explanation: [explanation]
+
+### Constraints
+- [constraint 1]
+- [constraint 2]
+- ...
+```
+
+### Debrief Scorecard Format
+
+```markdown
+## Debrief — [Problem Title]
+
+**Mode:** Practice / Mock | **Personality:** Friendly / Neutral / Tough | **Company:** [if selected]
+
+### Scores
+
+| Dimension | Score (1-5) | Justification |
+|---|---|---|
+| Approach Quality | X | [one sentence] |
+| Time/Space Complexity Accuracy | X | [one sentence] |
+| Edge Case Coverage | X | [one sentence] |
+| Communication Clarity | X | [one sentence] |
+| Clarifying Questions Quality | X | [one sentence] |
+| Think Aloud | X | [one sentence] |
+
+### Overall Verdict: Hire / Borderline / No Hire
+
+### Hints Used: [count]
+
+### JS Pitfalls Detected
+- [pitfall 1]: [corrected / not corrected]
+- ...
+
+### Communication Anti-Patterns
+- [anti-pattern type]: [count] occurrences — [suggestion]
+- ...
+
+### Edge Case Accuracy: [X / Y correct]
+
+### Dry Run Accuracy: [Accurate / Inaccurate — brief note]
+
+### Pace Report
+| Phase | Candidate Time | Benchmark | Status |
+|---|---|---|---|
+| Clarification | Xm | 3-5m | On Track / Over Time / Rushed |
+| Approach | Xm | 5-8m | On Track / Over Time / Rushed |
+| Coding | Xm | 15-20m | On Track / Over Time / Rushed |
+| Dry Run | Xm | 3-5m | On Track / Over Time / Rushed |
+
+### Time Management Note (Mock_Mode only)
+[Whether Candidate completed within allotted time]
+
+### Company-Specific Feedback (if company selected)
+[Feedback referencing the selected company's evaluation style]
+
+### Improvement Suggestions
+1. [Specific, actionable suggestion]
+
+### DSA Pattern
+**Primary Pattern:** [pattern name] — [one-sentence explanation]
+**Similar Problems:** 
+- [Problem Title] ([Difficulty])
+- [Problem Title] ([Difficulty])
+- [Problem Title] ([Difficulty])
+```
+
+### Weakness Log Entry Format
+
+```markdown
+## Session: [Date] — [Problem Title]
+
+**Difficulty:** [Easy/Medium/Hard] | **Mode:** [Practice/Mock] | **Verdict:** [Hire/Borderline/No Hire]
+
+### Weak Areas
+- **Category:** [e.g., "Graph Traversal Edge Cases"]
+  - Scoring dimensions rated ≤3: [list]
+  - Communication anti-patterns: [list]
+  - Specific observation: [one sentence]
+```
+
+### Session Replay Format
+
+```markdown
+# Session Replay: [Problem Title]
+
+**Date:** [YYYY-MM-DD]
+**Mode:** Practice / Mock | **Company:** [if selected] | **Personality:** [variant]
+**Problem:** [title] ([difficulty])
+
+## Problem Statement
+[Condensed problem statement]
+
+## Candidate's Approach
+[Summary of stated approach]
+
+## Key Decisions & Pivots
+- [Decision/pivot 1]
+- [Decision/pivot 2]
+
+## Mistakes & Corrections
+- [Mistake 1] → [Correction]
+
+## Hints Requested
+1. [Hint request context] → [Hint given]
+
+## JS Pitfalls
+- [Pitfall]: [corrected/not corrected]
+
+## Debrief Scores
+[Full scorecard as defined above]
+
+## Pace Report
+[Phase timing table]
+
+## Verdict: [Hire / Borderline / No Hire]
+```
+
+### Multi-Round Cumulative Debrief Format
+
+```markdown
+## Multi-Round Cumulative Debrief
+
+### Round Summaries
+| Round | Problem | Difficulty | Verdict | Avg Score |
+|---|---|---|---|---|
+| 1 | [title] | Easy-Medium | [verdict] | [avg] |
+| 2 | [title] | Medium-Hard | [verdict] | [avg] |
+| 3 | [title] | Hard | [verdict] | [avg] |
+
+### Score Trends
+| Dimension | Round 1 | Round 2 | Round 3 | Trend |
+|---|---|---|---|---|
+| Approach Quality | X | X | X | ↑/↓/→ |
+| ... | ... | ... | ... | ... |
+
+### Stamina Assessment
+[Consistent / Improved / Degraded — with explanation]
+
+### Overall Multi-Round Verdict: [Hire / Borderline / No Hire]
+
+### Cumulative Improvement Suggestions
+1. [Suggestion spanning all rounds]
+```
+
+
+---
+
+## Correctness Properties
+
+*A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+
+### Nature of This Feature
+
+This is a Kiro-native feature where the "system" is an AI model guided by a steering file and hook. Most acceptance criteria describe AI conversational behaviour (e.g., "the Interviewer SHALL ask clarifying questions"), which is inherently non-deterministic and not amenable to automated property testing. However, several requirements define deterministic rules about data formats, threshold logic, and pure functions that can be extracted and tested.
+
+The testable properties below focus on the deterministic, computable aspects of the feature.
+
+### Property 1: Problem Statement Validation
+
+*For any* problem statement (whether generated by the Interviewer or provided by the Candidate), the validation function should accept it if and only if it contains a non-empty problem description and at least one example with both input and output.
+
+**Validates: Requirements 2.8, 16.3**
+
+### Property 2: Weakness Category Threshold Detection
+
+*For any* weakness log containing entries grouped by category, if a category appears in three or more entries, the recommendation function should flag that category for focused practice. If a category appears in fewer than three entries, it should not be flagged.
+
+**Validates: Requirements 18.5**
+
+### Property 3: Pace Report Phase Classification
+
+*For any* phase duration and its corresponding benchmark range (lower bound, upper bound), the classification function should return "Over Time" when the duration exceeds 150% of the upper bound, "Rushed" when the duration is below 50% of the lower bound, and "On Track" otherwise. The benchmarks are: Clarification (3–5 min), Approach (5–8 min), Coding (15–20 min), Dry Run (3–5 min).
+
+**Validates: Requirements 20.2, 20.3, 20.4**
+
+### Property 4: Difficulty Progression Computation
+
+*For any* tuple of (previous verdict, hint count, current difficulty), the next difficulty should be computed as follows: if verdict is "Hire" and hints ≤ 1, escalate by one level; if verdict is "No Hire" or hints ≥ 3, de-escalate by one level; if verdict is "Borderline", maintain the same level. The result should always be clamped to the range [Easy, Hard] — never escalating beyond Hard or de-escalating below Easy.
+
+**Validates: Requirements 21.2, 21.3, 21.4, 21.6**
+
+### Property 5: Edge Case Accuracy Computation
+
+*For any* list of edge case results (each being a pair of candidate prediction and actual correctness), the edge case accuracy score should equal the count of correct predictions divided by the total number of edge cases presented.
+
+**Validates: Requirements 22.6**
+
+### Property 6: Session Replay Filename Format
+
+*For any* session date (YYYY-MM-DD) and problem title, the generated session replay filename should match the pattern `{date}-{problem-title-kebab-case}.md`, where the problem title is converted to lowercase kebab-case (spaces and special characters replaced with hyphens, consecutive hyphens collapsed).
+
+**Validates: Requirements 23.2**
+
+### Property 7: Session Replay Line Count Invariant
+
+*For any* generated session replay file, the total line count should not exceed 150 lines.
+
+**Validates: Requirements 23.4**
+
+---
+
+## Error Handling
+
+Since this feature operates entirely through Kiro's chat interface with no application code, "errors" manifest as conversational edge cases rather than runtime exceptions.
+
+### Steering File Errors
+
+| Scenario | Handling |
+|---|---|
+| Steering file is missing or malformed | Kiro will not load the interviewer persona. The Candidate should be instructed to verify the file exists at `.kiro/steering/dsa-interviewer.md`. |
+| Steering file instructions conflict | The steering file should be written with explicit priority rules (e.g., "Mock_Mode rules override Practice_Mode rules when both could apply"). |
+
+### Hook Errors
+
+| Scenario | Handling |
+|---|---|
+| Hook file is missing | The Candidate cannot trigger the session. Verify the file exists at `.kiro/hooks/start-mock-interview.md`. |
+| Candidate provides invalid selections | The hook instructions should include validation prompts — if the Candidate provides an unrecognised option, the Interviewer re-prompts with the valid options. |
+| Candidate provides incomplete problem in Candidate_Problem_Mode | The Interviewer validates the problem (per Property 1) and requests missing information before proceeding. |
+
+### Session State Errors
+
+| Scenario | Handling |
+|---|---|
+| Candidate tries to skip phases | The steering file instructs the Interviewer to enforce phase ordering. If the Candidate tries to jump to coding, the Interviewer redirects to the current phase. |
+| Candidate types `!optimal` before Debrief | The Interviewer informs the Candidate that the walkthrough is available only after the Debrief (Req 19.4). |
+| Candidate types `!hint` after Mock_Mode limit reached | The Interviewer declines and states the hint limit has been reached (Req 4.3). |
+| Candidate requests restart mid-session | The Interviewer confirms, resets hint count to zero, and re-triggers initialisation (Req 10.4). |
+
+### File I/O Errors
+
+| Scenario | Handling |
+|---|---|
+| Weakness log doesn't exist on first session | The Interviewer creates the file on first write. On read, absence means no prior weaknesses — proceed normally. |
+| Session replays directory doesn't exist | The Interviewer creates the directory before writing the replay file. |
+| Weakness log is malformed | The Interviewer should attempt to parse what it can and note any parsing issues. It should not fail the session due to a corrupted weakness log. |
+
+---
+
+## Testing Strategy
+
+### Nature of Testing for Kiro-Native Features
+
+This feature has no application code — it consists of markdown files (steering file, hook, weakness log, session replays) and AI-driven conversational behaviour. Testing falls into two categories:
+
+1. **Structural validation** (automated): Verify that the steering file, hook, and generated files conform to their required formats and contain all required content.
+2. **Behavioural validation** (manual): Verify that the Interviewer follows the steering file rules during live sessions. This requires human review of session transcripts.
+
+### Unit Tests (Example-Based)
+
+Unit tests should verify specific structural and content requirements:
+
+| Test | What It Verifies | Requirement |
+|---|---|---|
+| Steering file exists at `.kiro/steering/dsa-interviewer.md` | File location | Req 1.1 |
+| Steering file contains all six phase names in order | Phase definition | Req 1.3 |
+| Steering file lists all five JS pitfall categories | Pitfall coverage | Req 6.1 |
+| Hook file exists at `.kiro/hooks/start-mock-interview.md` with `trigger: user` | Hook configuration | Req 2.1 |
+| Hook file contains Multi_Round_Session option with three rounds | Multi-round structure | Req 17.2 |
+| Weakness log path is `.kiro/specs/dsa-mock-interviewer/weakness-log.md` | File location | Req 18.1 |
+| Default personality is Neutral when none selected | Default value | Req 24.2 |
+| First difficulty progression session starts at Medium | Initial difficulty | Req 21.1 |
+
+### Property-Based Tests
+
+Property-based tests should use a PBT library (e.g., `fast-check` for JavaScript) with a minimum of 100 iterations per test. Each test should be tagged with a comment referencing the design property.
+
+| Property Test | Design Property | Tag |
+|---|---|---|
+| Problem validation accepts/rejects based on required fields | Property 1 | `Feature: dsa-mock-interviewer, Property 1: Problem Statement Validation` |
+| Weakness threshold flags categories with ≥3 entries | Property 2 | `Feature: dsa-mock-interviewer, Property 2: Weakness Category Threshold Detection` |
+| Pace classification returns correct status for any duration/benchmark | Property 3 | `Feature: dsa-mock-interviewer, Property 3: Pace Report Phase Classification` |
+| Difficulty progression computes correct next difficulty | Property 4 | `Feature: dsa-mock-interviewer, Property 4: Difficulty Progression Computation` |
+| Edge case accuracy equals correct/total | Property 5 | `Feature: dsa-mock-interviewer, Property 5: Edge Case Accuracy Computation` |
+| Replay filename matches date-kebab pattern | Property 6 | `Feature: dsa-mock-interviewer, Property 6: Session Replay Filename Format` |
+| Replay file never exceeds 150 lines | Property 7 | `Feature: dsa-mock-interviewer, Property 7: Session Replay Line Count Invariant` |
+
+### Manual Testing Checklist
+
+Since most requirements govern AI conversational behaviour, manual testing is essential:
+
+- Run a full Practice_Mode session and verify all six phases occur in order
+- Run a full Mock_Mode session with timer and verify time reminders appear
+- Test `!hint` command in both modes (verify limit in Mock_Mode)
+- Test `!reveal` command
+- Test `!optimal` command before and after Debrief
+- Verify Debrief contains all six scoring dimensions with 1-5 ratings
+- Verify company-specific problem selection for each company
+- Test Candidate_Problem_Mode with valid and incomplete problems
+- Run a Multi_Round_Session and verify cumulative debrief
+- Verify weakness log is created and updated across sessions
+- Verify session replay is saved with correct filename and content
+- Test all three personality variants
+- Test difficulty progression across multiple sessions
+- Verify JS pitfall detection on code with known pitfalls
+- Verify communication anti-pattern detection in both modes
