@@ -2,7 +2,7 @@
 
 ## Overview
 
-This plan implements the DSA Mock Interviewer as a Kiro-native feature using a steering file, a hook file, and utility functions for the deterministic correctness properties. All interviewer behaviour is defined in markdown steering/hook files. Utility functions extract the deterministic, computable logic identified in the design's correctness properties.
+This plan implements the DSA Mock Interviewer using IDE configuration files (Kiro steering/hooks and GitHub Copilot instructions/prompts) and utility functions for the deterministic correctness properties. All interviewer behaviour is defined in markdown configuration files. Utility functions extract the deterministic, computable logic identified in the design's correctness properties.
 
 ## Tasks
 
@@ -122,6 +122,8 @@ This plan implements the DSA Mock Interviewer as a Kiro-native feature using a s
 
 ## Notes
 
-- The steering file and hook file are the core deliverables — they define all interviewer behaviour
+- The steering file (Kiro) and copilot-instructions file (Copilot) are the core deliverables — they define all interviewer behaviour
+- Hook files (Kiro) and prompt files (Copilot) handle session lifecycle
+- Shared reference documents under `.kiro/specs/dsa-mock-interviewer/ref/` are used by both IDEs
 - Utility functions in `src/interview-utils.js` extract deterministic logic from the design's correctness properties
 - Property 7 (Session Replay Line Count Invariant) is validated behaviourally by the steering file's 150-line cap rule rather than a utility function, since replay generation is done by the AI in chat

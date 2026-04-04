@@ -1,12 +1,14 @@
 # DSA Mock Interviewer
 
-A FAANG-level SDE-2 technical interview simulator that runs entirely inside Kiro. Practice data structures and algorithms interviews with a Socratic-style AI interviewer that challenges your thinking, catches your mistakes, and never gives away the answer.
+A FAANG-level SDE-2 technical interview simulator that runs entirely inside your AI-powered IDE. Practice data structures and algorithms interviews with a Socratic-style AI interviewer that challenges your thinking, catches your mistakes, and never gives away the answer.
+
+Supports both [Kiro](https://kiro.dev) and [GitHub Copilot](https://github.com/features/copilot) (in VS Code).
 
 ## Getting Started
 
 ### Prerequisites
 
-- [Kiro IDE](https://kiro.dev)
+- [Kiro IDE](https://kiro.dev) or [VS Code](https://code.visualstudio.com/) with [GitHub Copilot](https://github.com/features/copilot) installed
 - Node.js (ES Modules)
 
 ### Setup
@@ -17,7 +19,11 @@ npm install
 
 ### Start a Session
 
-Trigger the **Start DSA Mock Interview** hook from the Kiro hooks panel. You'll get a single setup prompt with all options — reply with your choices or just say "go" for defaults.
+**In Kiro:** Trigger the **Start DSA Mock Interview** hook from the Kiro hooks panel.
+
+**In VS Code (Copilot):** Open the Chat panel and run the **Start DSA Mock Interview** prompt from `.github/prompts/start-mock-interview.prompt.md`.
+
+You'll get a single setup prompt with all options — reply with your choices or just say "go" for defaults.
 
 **Quickstart example:**
 > Mock, DP, Google, Tough
@@ -150,7 +156,11 @@ npm run daily -- --new --topic Trees
 ```
 Reads your weakness log and suggests a problem weighted toward your weakest topics. Includes a built-in bank of ~80 problems across 8 topics and 3 difficulties. Override with your own `src/scripts/problem-bank.json`.
 
-## Hooks
+## Automation
+
+Session lifecycle is automated differently depending on your IDE:
+
+### Kiro (Hooks)
 
 Three agent hooks automate session lifecycle:
 
@@ -159,6 +169,17 @@ Three agent hooks automate session lifecycle:
 | `start-mock-interview` | User-triggered | Collects session params in a single prompt, loads reference files, begins session |
 | `post-session-save` | Agent stop | Ensures session replay and weakness log are saved after every debrief |
 | `phase-pace-monitor` | Prompt submit | Silently counts exchanges per phase, nudges interviewer when a phase runs long |
+
+### VS Code + GitHub Copilot (Prompts)
+
+Two reusable prompts in `.github/prompts/`:
+
+| Prompt | What it does |
+|--------|-------------|
+| `start-mock-interview.prompt.md` | Collects session params, loads reference files, begins session |
+| `save-session.prompt.md` | Saves session replay, updates weakness log, cleans up after debrief |
+
+Note: Copilot does not have an equivalent to Kiro's `phase-pace-monitor` hook (auto-triggered on every message). Pace coaching rules are embedded in `copilot-instructions.md` instead.
 
 ## Project Structure
 
@@ -175,12 +196,12 @@ src/
 ├── current-problem.md          # Active problem during session (gitignored, auto-deleted)
 └── interview-report.pdf        # Exported report (gitignored)
 
-.kiro/
+.kiro/                              # Kiro IDE configuration
 ├── steering/
-│   ├── dsa-interviewer.md      # Core interviewer persona, phases, scoring rules
-│   ├── structure.md            # Project structure reference
-│   ├── tech.md                 # Tech stack conventions
-│   └── product.md              # Product summary
+│   ├── dsa-interviewer.md          # Core interviewer persona, phases, scoring rules
+│   ├── structure.md                # Project structure reference
+│   ├── tech.md                     # Tech stack conventions
+│   └── product.md                  # Product summary
 ├── hooks/
 │   ├── start-mock-interview.kiro.hook
 │   ├── post-session-save.kiro.hook
@@ -189,10 +210,16 @@ src/
     ├── requirements.md
     ├── design.md
     ├── tasks.md
-    └── ref/
+    └── ref/                        # Shared reference docs (used by both Kiro and Copilot)
         ├── advanced-features.md
         ├── company-profiles.md
         └── multi-round.md
+
+.github/                            # GitHub Copilot configuration
+├── copilot-instructions.md         # Full interviewer rules for Copilot
+└── prompts/
+    ├── start-mock-interview.prompt.md
+    └── save-session.prompt.md
 ```
 
 ## Company Support

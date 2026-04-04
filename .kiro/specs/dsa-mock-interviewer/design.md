@@ -2,30 +2,42 @@
 
 ## Overview
 
-The DSA Mock Interviewer is a Kiro-native feature that transforms Kiro's AI into a FAANG-level technical interviewer. It operates entirely within Kiro's chat interface using two core Kiro primitives:
+The DSA Mock Interviewer transforms an AI-powered IDE's chat into a FAANG-level technical interviewer. It operates entirely within the IDE's chat interface using configuration files that define the interviewer persona and session rules.
 
-1. A **steering file** (`.kiro/steering/dsa-interviewer.md`) that defines the Interviewer persona, session rules, phase logic, scoring rubrics, and all behavioural instructions.
-2. A **user-triggered hook** (`.kiro/hooks/start-mock-interview.md`) that initialises a session by collecting Candidate preferences and launching the interview flow.
+**In Kiro**, this uses two core primitives:
+1. A **steering file** (`.kiro/steering/dsa-interviewer.md`) that defines the Interviewer persona, session rules, phase logic, scoring rubrics, and all behavioural instructions — always active in Kiro chat.
+2. A **user-triggered hook** (`.kiro/hooks/start-mock-interview.kiro.hook`) that initialises a session by collecting Candidate preferences and launching the interview flow.
+3. Additional hooks for post-session saving and pace monitoring.
 
-There is no application code, no backend, no React. The steering file is always active in Kiro chat, shaping every response. The hook is a one-shot trigger that kicks off the session initialisation sequence. All session state (current phase, hint count, JS pitfalls detected, timer, etc.) is maintained conversationally by the Interviewer within the chat context. Persistent data (weakness log, session replays) is written to markdown files on disk.
+**In VS Code with GitHub Copilot**, the equivalent setup uses:
+1. A **copilot-instructions file** (`.github/copilot-instructions.md`) containing the full interviewer rules.
+2. **Reusable prompts** (`.github/prompts/`) for starting sessions and saving session data.
+
+Both setups share the same reference documents under `.kiro/specs/dsa-mock-interviewer/ref/`.
+
+There is no application code, no backend, no React. All session state (current phase, hint count, JS pitfalls detected, timer, etc.) is maintained conversationally by the Interviewer within the chat context. Persistent data (weakness log, session replays) is written to markdown files on disk.
 
 ### Key Design Decisions
 
-- **Single steering file**: All persona rules, phase definitions, scoring rubrics, company profiles, pitfall lists, and anti-pattern detection rules live in one steering file. This keeps the Interviewer's behaviour atomic and avoids fragmentation across multiple files.
-- **Conversational state management**: Session state (phase, hint count, timer, pitfalls) is tracked within the chat context rather than in external files. This is the natural model for Kiro steering — the AI maintains context across turns.
+- **Single steering file / instructions file**: All persona rules, phase definitions, scoring rubrics, company profiles, pitfall lists, and anti-pattern detection rules live in one file per IDE (`.kiro/steering/dsa-interviewer.md` for Kiro, `.github/copilot-instructions.md` for Copilot). This keeps the Interviewer's behaviour atomic and avoids fragmentation.
+- **Shared reference documents**: Advanced features, company profiles, and multi-round rules live under `.kiro/specs/dsa-mock-interviewer/ref/` and are referenced by both Kiro hooks and Copilot prompts.
+- **Conversational state management**: Session state (phase, hint count, timer, pitfalls) is tracked within the chat context rather than in external files. This is the natural model for AI-driven chat — the AI maintains context across turns.
 - **Persistent files for cross-session data only**: The weakness log and session replays are the only files written to disk, because they need to survive across sessions.
-- **Hook as session bootstrapper**: The hook collects all session parameters (mode, company, topic, personality, difficulty progression, candidate problem) in a structured flow, then hands off to the steering file's phase logic.
+- **Hook/prompt as session bootstrapper**: The hook (Kiro) or prompt (Copilot) collects all session parameters (mode, company, topic, personality, difficulty progression, candidate problem) in a structured flow, then hands off to the steering/instructions file's phase logic.
 
 ---
 
 ## Architecture
 
-The feature has two Kiro-native components and two persistent file stores:
+The feature has two IDE-specific configuration layers, shared reference documents, and two persistent file stores:
 
 ```mermaid
 graph TD
-    A[Candidate triggers Hook] --> B[Hook: start-mock-interview.md]
-    B --> C{Collect Session Parameters}
+    A[Candidate triggers session] --> B{Which IDE?}
+    B -->|Kiro| B1[Hook: start-mock-interview.kiro.hook]
+    B -->|Copilot| B2[Prompt: start-mock-interview.prompt.md]
+    B1 --> C{Collect Session Parameters}
+    B2 --> C
     C --> D[Mode: Practice / Mock]
     C --> E[Company: Google / Meta / Amazon / Microsoft / Apple / Random]
     C --> F[Topic: Arrays / DP / Graphs / Trees / etc.]
@@ -35,9 +47,12 @@ graph TD
     C --> J[Difficulty Progression?]
     C --> K[Timer: 20 / 35 / 45 min]
     
-    D & E & F & G & H & I & J & K --> L[Steering File: dsa-interviewer.md]
+    D & E & F & G & H & I & J & K --> L[Interviewer Rules]
+    L -->|Kiro| L1[Steering File: dsa-interviewer.md]
+    L -->|Copilot| L2[copilot-instructions.md]
     
-    L --> M[Phase 1: Clarification]
+    L1 --> M[Phase 1: Clarification]
+    L2 --> M
     M --> N[Phase 2: Approach]
     N --> O[Phase 3: Coding]
     O --> P[Phase 4: Edge Case Challenge]
@@ -55,20 +70,25 @@ graph TD
 
 ### Component Interaction Flow
 
-1. **Candidate triggers the hook** → Hook prompts for session parameters in sequence.
-2. **Parameters collected** → Hook instructs the Interviewer (via steering file) to generate/accept a problem and begin the Clarification phase.
-3. **Steering file drives all six phases** → Each phase has entry/exit conditions, behavioural rules, and transition logic defined in the steering file.
-4. **Debrief completes** → Steering file instructs the Interviewer to write the session replay file, update the weakness log, and offer follow-up/optimal walkthrough.
+1. **Candidate triggers the session** → Hook (Kiro) or Prompt (Copilot) prompts for session parameters.
+2. **Parameters collected** → The interviewer rules (steering file or copilot-instructions) drive problem generation/acceptance and begin the Clarification phase.
+3. **Interviewer rules drive all six phases** → Each phase has entry/exit conditions, behavioural rules, and transition logic.
+4. **Debrief completes** → The interviewer writes the session replay file, updates the weakness log, and offers follow-up/optimal walkthrough.
 
 ---
 
 ## Components and Interfaces
 
-### Component 1: Steering File (`.kiro/steering/dsa-interviewer.md`)
+### Component 1: Interviewer Rules
 
-This is the core component. It defines everything the Interviewer needs to behave correctly.
+The interviewer rules are the core component. They define everything the Interviewer needs to behave correctly.
 
-#### Sections within the Steering File
+**In Kiro:** `.kiro/steering/dsa-interviewer.md` (steering file, always active in chat)
+**In Copilot:** `.github/copilot-instructions.md` (workspace instructions, always active in chat)
+
+Both files contain the same rules. The Kiro steering file is the source of truth; the Copilot instructions file is a standalone equivalent.
+
+#### Sections within the Interviewer Rules
 
 | Section | Purpose | Requirements Covered |
 |---|---|---|
@@ -98,11 +118,14 @@ This is the core component. It defines everything the Interviewer needs to behav
 | **Interviewer Personality** | Three personality variants, tone rules, consistency requirement | Req 24.1–24.7 |
 | **Special Commands** | `!hint`, `!reveal`, `!optimal`, `!restart` command definitions | Req 1.2, 4.2, 10.4, 19.1 |
 
-### Component 2: Hook (`.kiro/hooks/start-mock-interview.md`)
+### Component 2: Session Initialisation
 
-The hook is a user-triggered Kiro hook that bootstraps a session.
+The session bootstrapper collects parameters and kicks off the interview.
 
-#### Hook Structure
+**In Kiro:** `.kiro/hooks/start-mock-interview.kiro.hook` (user-triggered hook)
+**In Copilot:** `.github/prompts/start-mock-interview.prompt.md` (reusable prompt)
+
+#### Hook/Prompt Structure
 
 ```markdown
 ---
@@ -127,15 +150,15 @@ description: Start a DSA mock interview session
 5. Begin the session by generating/accepting the problem and entering the Clarification phase.
 ```
 
-#### Hook Parameter Collection Flow
+#### Parameter Collection Flow
 
 ```mermaid
 sequenceDiagram
     participant C as Candidate
-    participant H as Hook
-    participant S as Steering File
+    participant H as Hook/Prompt
+    participant S as Interviewer Rules
 
-    C->>H: Trigger hook
+    C->>H: Trigger hook/prompt
     H->>C: Select session mode?
     C->>H: Practice / Mock
     H->>C: Single or Multi-Round?
@@ -162,6 +185,16 @@ sequenceDiagram
     C->>H: On / Off
     H->>S: All parameters collected, begin Clarification phase
 ```
+
+### Component 2a: Post-Session Save (Kiro: hook, Copilot: prompt)
+
+**In Kiro:** `.kiro/hooks/post-session-save.kiro.hook` (triggered on agent stop)
+**In Copilot:** `.github/prompts/save-session.prompt.md` (manually triggered after debrief)
+
+### Component 2b: Pace Monitor (Kiro only)
+
+**In Kiro:** `.kiro/hooks/phase-pace-monitor.kiro.hook` (triggered on every prompt submit)
+**In Copilot:** Pace coaching rules are embedded directly in `copilot-instructions.md` since Copilot does not support auto-triggered hooks on every message.
 
 ### Component 3: Weakness Log File (`src/weakness-log.md`)
 
@@ -439,7 +472,7 @@ Hints Used: [count]
 
 ### Nature of This Feature
 
-This is a Kiro-native feature where the "system" is an AI model guided by a steering file and hook. Most acceptance criteria describe AI conversational behaviour (e.g., "the Interviewer SHALL ask clarifying questions"), which is inherently non-deterministic and not amenable to automated property testing. However, several requirements define deterministic rules about data formats, threshold logic, and pure functions that can be extracted and tested.
+This is a feature where the "system" is an AI model guided by configuration files (steering file, copilot-instructions, hooks, prompts). Most acceptance criteria describe AI conversational behaviour (e.g., "the Interviewer SHALL ask clarifying questions"), which is inherently non-deterministic and not amenable to automated property testing. However, several requirements define deterministic rules about data formats, threshold logic, and pure functions that can be extracted and tested.
 
 The testable properties below focus on the deterministic, computable aspects of the feature.
 
@@ -491,18 +524,18 @@ The testable properties below focus on the deterministic, computable aspects of 
 
 Since this feature operates entirely through Kiro's chat interface with no application code, "errors" manifest as conversational edge cases rather than runtime exceptions.
 
-### Steering File Errors
+### Steering/Instructions File Errors
 
 | Scenario | Handling |
 |---|---|
-| Steering file is missing or malformed | Kiro will not load the interviewer persona. The Candidate should be instructed to verify the file exists at `.kiro/steering/dsa-interviewer.md`. |
-| Steering file instructions conflict | The steering file should be written with explicit priority rules (e.g., "Mock_Mode rules override Practice_Mode rules when both could apply"). |
+| Configuration file is missing or malformed | The IDE will not load the interviewer persona. Verify the file exists at `.kiro/steering/dsa-interviewer.md` (Kiro) or `.github/copilot-instructions.md` (Copilot). |
+| Instructions conflict | The configuration file should be written with explicit priority rules (e.g., "Mock_Mode rules override Practice_Mode rules when both could apply"). |
 
-### Hook Errors
+### Hook/Prompt Errors
 
 | Scenario | Handling |
 |---|---|
-| Hook file is missing | The Candidate cannot trigger the session. Verify the file exists at `.kiro/hooks/start-mock-interview.md`. |
+| Hook/prompt file is missing | The Candidate cannot trigger the session. Verify the file exists at `.kiro/hooks/start-mock-interview.kiro.hook` (Kiro) or `.github/prompts/start-mock-interview.prompt.md` (Copilot). |
 | Candidate provides invalid selections | The hook instructions should include validation prompts — if the Candidate provides an unrecognised option, the Interviewer re-prompts with the valid options. |
 | Candidate provides incomplete problem in Candidate_Problem_Mode | The Interviewer validates the problem (per Property 1) and requests missing information before proceeding. |
 
@@ -527,12 +560,12 @@ Since this feature operates entirely through Kiro's chat interface with no appli
 
 ## Testing Strategy
 
-### Nature of Testing for Kiro-Native Features
+### Nature of Testing
 
-This feature has no application code — it consists of markdown files (steering file, hook, weakness log, session replays) and AI-driven conversational behaviour. Testing falls into two categories:
+This feature has no application code — it consists of markdown files (steering/instructions files, hooks/prompts, weakness log, session replays) and AI-driven conversational behaviour. Testing falls into two categories:
 
-1. **Structural validation** (automated): Verify that the steering file, hook, and generated files conform to their required formats and contain all required content.
-2. **Behavioural validation** (manual): Verify that the Interviewer follows the steering file rules during live sessions. This requires human review of session transcripts.
+1. **Structural validation** (automated): Verify that the configuration files and generated files conform to their required formats and contain all required content.
+2. **Behavioural validation** (manual): Verify that the Interviewer follows the rules during live sessions. This requires human review of session transcripts.
 
 ### Unit Tests (Example-Based)
 
@@ -540,11 +573,13 @@ Unit tests should verify specific structural and content requirements:
 
 | Test | What It Verifies | Requirement |
 |---|---|---|
-| Steering file exists at `.kiro/steering/dsa-interviewer.md` | File location | Req 1.1 |
+| Steering file exists at `.kiro/steering/dsa-interviewer.md` | Kiro config file location | Req 1.1 |
+| Copilot instructions exist at `.github/copilot-instructions.md` | Copilot config file location | Req 1.1 |
 | Steering file contains all six phase names in order | Phase definition | Req 1.3 |
 | Steering file lists all five JS pitfall categories | Pitfall coverage | Req 6.1 |
-| Hook file exists at `.kiro/hooks/start-mock-interview.md` with `trigger: user` | Hook configuration | Req 2.1 |
-| Hook file contains Multi_Round_Session option with three rounds | Multi-round structure | Req 17.2 |
+| Hook file exists at `.kiro/hooks/start-mock-interview.kiro.hook` | Kiro hook configuration | Req 2.1 |
+| Copilot prompt exists at `.github/prompts/start-mock-interview.prompt.md` | Copilot prompt configuration | Req 2.1 |
+| Hook/prompt contains Multi_Round_Session option with three rounds | Multi-round structure | Req 17.2 |
 | Weakness log path is `src/weakness-log.md` | File location | Req 18.1 |
 | Default personality is Neutral when none selected | Default value | Req 24.2 |
 | First difficulty progression session starts at Medium | Initial difficulty | Req 21.1 |

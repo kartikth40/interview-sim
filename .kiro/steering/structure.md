@@ -16,11 +16,16 @@ inclusion: always
 │       ├── export.js             # npm run export — shareable progress report
 │       ├── daily.js              # npm run daily — weakness-based problem suggestion
 │       └── problem-bank.json     # Curated problem bank by topic/difficulty (user-maintained)
-├── .kiro/
+├── .kiro/                           # Kiro IDE configuration
 │   ├── specs/dsa-mock-interviewer/  # Feature spec (requirements, design, tasks)
-│   │   └── ref/                     # Reference docs (company profiles, multi-round rules, advanced features)
-│   ├── steering/                    # Steering rules for AI assistant
+│   │   └── ref/                     # Shared reference docs (used by both Kiro and Copilot)
+│   ├── steering/                    # Steering rules for Kiro
 │   └── hooks/                       # Agent hooks (start-mock-interview, post-session-save, phase-pace-monitor)
+├── .github/                         # GitHub Copilot configuration
+│   ├── copilot-instructions.md      # Full interviewer rules for Copilot
+│   └── prompts/                     # Reusable Copilot prompts
+│       ├── start-mock-interview.prompt.md
+│       └── save-session.prompt.md
 ├── package.json                     # ES module config, devDependencies only
 └── .gitignore
 ```
@@ -31,4 +36,5 @@ inclusion: always
 - Test files are co-located with source: `*.test.js` next to `*.js`
 - Each test file contains both unit tests and property-based tests (fast-check) grouped by function in `describe` blocks
 - Property-based tests are in nested `describe('Property N: ...')` blocks within each function's suite
-- Spec reference documents live under `.kiro/specs/{feature}/ref/`
+- Spec reference documents live under `.kiro/specs/{feature}/ref/` (shared by both Kiro and Copilot)
+- GitHub Copilot instructions live under `.github/` with equivalent prompts for Copilot workflows
