@@ -9,7 +9,7 @@ You are starting a DSA mock interview session. Follow these steps sequentially t
 
 ### Step 1: Read Weakness Log
 
-Before prompting the Candidate, check if the file `.kiro/specs/dsa-mock-interviewer/weakness-log.md` exists.
+Before prompting the Candidate, check if the file `src/weakness-log.md` exists.
 
 - **If it exists:** Read it and identify all weakness categories and their occurrence counts. Note any categories with **≥3 entries** — these are recurring weaknesses. You will reference them when selecting a problem and during the session.
 - **If it does not exist:** This is the Candidate's first session. Proceed normally with no weakness context.

@@ -8,7 +8,8 @@ inclusion: always
 ├── src/
 │   ├── interview-utils.js        # Core utility functions (validation, scoring, pacing, difficulty, replay)
 │   ├── interview-utils.test.js   # Unit + property-based tests for all utils
-│   └── session-replays/          # Saved session replay files
+│   ├── session-replays/          # Saved session replay files (gitignored)
+│   └── weakness-log.md           # Persistent weakness tracker across sessions (gitignored)
 ├── .kiro/
 │   ├── specs/dsa-mock-interviewer/  # Feature spec (requirements, design, tasks)
 │   │   └── ref/                     # Reference docs (company profiles, multi-round rules, advanced features)

@@ -50,7 +50,7 @@ graph TD
     R --> V[Offer Optimal Walkthrough via !optimal]
     
     S --> W[src/session-replays/*.md]
-    T --> X[weakness-log.md]
+    T --> X[src/weakness-log.md]
 ```
 
 ### Component Interaction Flow
@@ -112,7 +112,7 @@ description: Start a DSA mock interview session
 
 ## Instructions
 
-1. Read the weakness log at `.kiro/specs/dsa-mock-interviewer/weakness-log.md` if it exists.
+1. Read the weakness log at `src/weakness-log.md` if it exists.
 2. Prompt the Candidate to select:
    a. Session mode: Practice_Mode or Mock_Mode
    b. Session format: Single session or Multi_Round_Session
@@ -163,7 +163,7 @@ sequenceDiagram
     H->>S: All parameters collected, begin Clarification phase
 ```
 
-### Component 3: Weakness Log File (`.kiro/specs/dsa-mock-interviewer/weakness-log.md`)
+### Component 3: Weakness Log File (`src/weakness-log.md`)
 
 A persistent markdown file that accumulates weakness data across sessions.
 
@@ -483,7 +483,7 @@ Unit tests should verify specific structural and content requirements:
 | Steering file lists all five JS pitfall categories | Pitfall coverage | Req 6.1 |
 | Hook file exists at `.kiro/hooks/start-mock-interview.md` with `trigger: user` | Hook configuration | Req 2.1 |
 | Hook file contains Multi_Round_Session option with three rounds | Multi-round structure | Req 17.2 |
-| Weakness log path is `.kiro/specs/dsa-mock-interviewer/weakness-log.md` | File location | Req 18.1 |
+| Weakness log path is `src/weakness-log.md` | File location | Req 18.1 |
 | Default personality is Neutral when none selected | Default value | Req 24.2 |
 | First difficulty progression session starts at Medium | Initial difficulty | Req 21.1 |
 

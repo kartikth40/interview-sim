@@ -303,7 +303,7 @@ The DSA Mock Interviewer is a Kiro-native feature that turns Kiro's built-in AI 
 
 #### Acceptance Criteria
 
-1. THE Interviewer SHALL maintain a Weakness_Log as a markdown file located at `.kiro/specs/dsa-mock-interviewer/weakness-log.md`.
+1. THE Interviewer SHALL maintain a Weakness_Log as a markdown file located at `src/weakness-log.md`.
 2. AFTER each session Debrief, THE Interviewer SHALL append an entry to the Weakness_Log containing: the session date, problem title, scoring dimensions rated 3 or below, detected Communication_Anti_Patterns, and specific weak areas identified.
 3. THE Weakness_Log SHALL group entries by weakness category (e.g., "Graph Traversal Edge Cases", "Space Complexity Analysis", "Think Aloud Under Pressure").
 4. WHEN a new session begins, THE Interviewer SHALL read the Weakness_Log and SHALL reference recurring weak areas when selecting problems or providing targeted pushbacks.

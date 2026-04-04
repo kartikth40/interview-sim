@@ -1,1 +1,3 @@
 /node_modules
+/src/session-replays
+/src/weakness-log.md

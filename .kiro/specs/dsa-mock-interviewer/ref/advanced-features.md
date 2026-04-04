@@ -92,7 +92,7 @@ Impact: silence/jumping-to-code → lower Think_Aloud_Score. Hedging/over-explai
 
 ## Weakness Log Integration
 
-File: `.kiro/specs/dsa-mock-interviewer/weakness-log.md`
+File: `src/weakness-log.md`
 
 ### Read on Session Start
 - If exists: parse categories + counts. Categories with ≥3 entries = recurring.
