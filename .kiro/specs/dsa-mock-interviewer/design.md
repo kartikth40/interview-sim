@@ -79,7 +79,7 @@ This is the core component. It defines everything the Interviewer needs to behav
 | **Pushback Rules** | When and how to challenge the Candidate | Req 5.1–5.5 |
 | **JS Pitfall Detection** | List of pitfalls, detection rules, flagging behaviour | Req 6.1–6.4 |
 | **Timer Rules** | Mock_Mode timer logic, reminders, expiry behaviour | Req 7.1–7.5 |
-| **Debrief Rubric** | Six scoring dimensions, verdict logic, pace report, anti-pattern summary | Req 8.1–8.8 |
+| **Debrief Rubric** | Seven scoring dimensions, verdict logic, pace report, anti-pattern summary, communication tips | Req 8.1–8.8 |
 | **Company Profiles** | Per-company topic preferences and evaluation emphasis | Req 9.1–9.6 |
 | **State Tracking Rules** | Phase tracking, hint count, pitfall count, approach reference | Req 10.1–10.5 |
 | **Follow-Up Problem Rules** | When to offer, condensed session format, constraint escalation | Req 11.1–11.5 |
@@ -234,60 +234,112 @@ Per-session markdown summaries written after each debrief.
 ### Debrief Scorecard Format
 
 ```markdown
-## Debrief — [Problem Title]
+📊 Debrief — [Problem Title]
+Mode: [Practice/Mock] | Personality: [variant] | Company: [if selected]
 
-**Mode:** Practice / Mock | **Personality:** Friendly / Neutral / Tough | **Company:** [if selected]
+┌─────────────────────────────────┬───────┬────┐
+│ Dimension                       │ Score │    │
+├─────────────────────────────────┼───────┼────┤
+│ Approach Quality                │  X/5  │ ✅ │  [one-sentence justification]
+│ Time/Space Complexity Accuracy  │  X/5  │ ✅ │  [one-sentence justification]
+│ Edge Case Coverage              │  X/5  │ ⚠️ │  [one-sentence justification]
+│ Communication & Fluency         │  X/5  │ ❌ │  [one-sentence justification]
+│ Clarifying Questions Quality    │  X/5  │ ✅ │  [one-sentence justification]
+│ Think Aloud                     │  X/5  │ ⚠️ │  [one-sentence justification]
+│ Code Narration Quality          │  X/5  │ ✅ │  [one-sentence justification]
+└─────────────────────────────────┴───────┴────┘
 
-### Scores
+Average: X.X/5  ████████░░
 
-| Dimension | Score (1-5) | Justification |
-|---|---|---|
-| Approach Quality | X | [one sentence] |
-| Time/Space Complexity Accuracy | X | [one sentence] |
-| Edge Case Coverage | X | [one sentence] |
-| Communication Clarity | X | [one sentence] |
-| Clarifying Questions Quality | X | [one sentence] |
-| Think Aloud | X | [one sentence] |
+🟢 Verdict: HIRE / 🟡 Verdict: BORDERLINE / 🔴 Verdict: NO HIRE
 
-### Overall Verdict: Hire / Borderline / No Hire
+Hints Used: [count]
 
-### Hints Used: [count]
+<details>
+<summary>💬 Communication Tips</summary>
 
-### JS Pitfalls Detected
-- [pitfall 1]: [corrected / not corrected]
+1. [Specific, actionable tip for improving communication and fluency]
+2. [Specific, actionable tip]
+
+</details>
+
+<details>
+<summary>🧪 Edge Case Analysis</summary>
+
+**Accuracy:** [X/Y correct on listed cases]
+
+**Missed Edge Cases:**
+- [edge case 1 the Candidate failed to identify]
+- [edge case 2 the Candidate failed to identify]
+
+</details>
+
+<details>
+<summary>⏱️ Pace Report</summary>
+
+| Phase | Candidate Time | Benchmark | Status |
+|---|---|---|---|
+| Clarification | Xm | 3-5m | ✅ On Track / ⚠️ Over Time / ⚠️ Rushed |
+| Approach | Xm | 5-8m | ✅ On Track / ⚠️ Over Time / ⚠️ Rushed |
+| Coding | Xm | 15-20m | ✅ On Track / ⚠️ Over Time / ⚠️ Rushed |
+| Dry Run | Xm | 3-5m | ✅ On Track / ⚠️ Over Time / ⚠️ Rushed |
+
+**Time Management Note (Mock_Mode only):**
+[Whether Candidate completed within allotted time]
+
+</details>
+
+<details>
+<summary>🐛 JS Pitfalls</summary>
+
+- [pitfall 1]: [corrected ✅ / not corrected ❌]
 - ...
 
-### Communication Anti-Patterns
+</details>
+
+<details>
+<summary>🗣️ Communication Anti-Patterns</summary>
+
 - [anti-pattern type]: [count] occurrences — [suggestion]
 - ...
 
-### Edge Case Accuracy: [X / Y correct]
+</details>
 
-### Dry Run Accuracy: [Accurate / Inaccurate — brief note]
+<details>
+<summary>🧠 Think-Aloud Analysis</summary>
 
-### Pace Report
-| Phase | Candidate Time | Benchmark | Status |
-|---|---|---|---|
-| Clarification | Xm | 3-5m | On Track / Over Time / Rushed |
-| Approach | Xm | 5-8m | On Track / Over Time / Rushed |
-| Coding | Xm | 15-20m | On Track / Over Time / Rushed |
-| Dry Run | Xm | 3-5m | On Track / Over Time / Rushed |
+**Dry Run Accuracy:** [Accurate ✅ / Inaccurate ❌ / Incomplete ⚠️ — brief note]
 
-### Time Management Note (Mock_Mode only)
-[Whether Candidate completed within allotted time]
+**Strong moment:** [quote/paraphrase]
+**Weak moment:** [quote/paraphrase]
 
-### Company-Specific Feedback (if company selected)
-[Feedback referencing the selected company's evaluation style]
+</details>
 
-### Improvement Suggestions
+<details>
+<summary>🔗 DSA Pattern & Similar Problems</summary>
+
+**Primary Pattern:** [pattern name] — [one-sentence explanation]
+
+**Similar Problems:**
+- [Problem Title] ([Difficulty])
+- [Problem Title] ([Difficulty])
+- [Problem Title] ([Difficulty])
+
+</details>
+
+<details>
+<summary>🏢 Company-Specific Feedback</summary>
+
+[Feedback referencing the selected company's evaluation style, or "No company selected" if N/A]
+
+</details>
+
+<details>
+<summary>📈 Improvement Suggestions</summary>
+
 1. [Specific, actionable suggestion]
 
-### DSA Pattern
-**Primary Pattern:** [pattern name] — [one-sentence explanation]
-**Similar Problems:** 
-- [Problem Title] ([Difficulty])
-- [Problem Title] ([Difficulty])
-- [Problem Title] ([Difficulty])
+</details>
 ```
 
 ### Weakness Log Entry Format
@@ -299,6 +351,7 @@ Per-session markdown summaries written after each debrief.
 
 ### Weak Areas
 - **Category:** [e.g., "Graph Traversal Edge Cases"]
+  - Status: [new / recurring / improving / resolved]
   - Scoring dimensions rated ≤3: [list]
   - Communication anti-patterns: [list]
   - Specific observation: [one sentence]
@@ -325,6 +378,15 @@ Per-session markdown summaries written after each debrief.
 
 ## Mistakes & Corrections
 - [Mistake 1] → [Correction]
+
+## Key Exchanges
+[2–3 verbatim or near-verbatim moments from the session]
+
+**[Type]: [one-line summary]**
+> Candidate: "[what they said/wrote]"
+> Interviewer: "[the challenge/hint/prompt]"
+> Candidate: "[how they responded]"
+> Outcome: [one sentence]
 
 ## Hints Requested
 1. [Hint request context] → [Hint given]
@@ -510,7 +572,7 @@ Since most requirements govern AI conversational behaviour, manual testing is es
 - Test `!hint` command in both modes (verify limit in Mock_Mode)
 - Test `!reveal` command
 - Test `!optimal` command before and after Debrief
-- Verify Debrief contains all six scoring dimensions with 1-5 ratings
+- Verify Debrief contains all seven scoring dimensions with 1-5 ratings
 - Verify company-specific problem selection for each company
 - Test Candidate_Problem_Mode with valid and incomplete problems
 - Run a Multi_Round_Session and verify cumulative debrief

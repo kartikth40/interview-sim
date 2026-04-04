@@ -19,7 +19,7 @@ The DSA Mock Interviewer is a Kiro-native feature that turns Kiro's built-in AI 
 - **Dry_Run**: The phase between Coding and Debrief where the Candidate traces through their solution step by step with a specific input.
 - **Hint**: A Socratic nudge provided by the Interviewer that does not reveal the solution directly.
 - **Pushback**: An Interviewer challenge such as "can you optimise that?" or "what's the time complexity?".
-- **Debrief**: The scored post-coding review covering six dimensions.
+- **Debrief**: The scored post-coding review covering seven dimensions.
 - **Think_Aloud_Score**: A scoring dimension that evaluates the Candidate's ability to verbalise tradeoffs, consider multiple approaches, and articulate reasoning during the session.
 - **Follow_Up_Problem**: A harder variant of the session problem presented after the Debrief to train adaptability.
 - **DSA_Pattern**: A recognised algorithmic pattern (e.g., sliding window, monotonic stack, two pointers) that a problem maps to.
@@ -155,11 +155,11 @@ The DSA Mock Interviewer is a Kiro-native feature that turns Kiro's built-in AI 
 
 #### Acceptance Criteria
 
-1. THE Interviewer SHALL produce a Debrief at the end of every session covering exactly six scoring dimensions: Approach Quality, Time/Space Complexity Accuracy, Edge Case Coverage, Communication Clarity, Clarifying Questions Quality, and Think_Aloud_Score.
+1. THE Interviewer SHALL produce a Debrief at the end of every session covering exactly seven scoring dimensions: Approach Quality, Time/Space Complexity Accuracy, Edge Case Coverage, Communication & Fluency, Clarifying Questions Quality, Think_Aloud_Score, and Code Narration Quality.
 2. EACH scoring dimension SHALL be rated on a scale of 1 to 5, where 1 is poor and 5 is excellent, and SHALL include a one-sentence justification.
 3. THE Think_Aloud_Score SHALL evaluate whether the Candidate verbalised tradeoffs between approaches, considered multiple strategies before committing, and articulated reasoning at each decision point during the session.
 4. THE Debrief SHALL include the total hint count used during the session.
-5. THE Debrief SHALL include an overall session verdict: "Hire", "Borderline", or "No Hire", based on the aggregate score across all six dimensions.
+5. THE Debrief SHALL include an overall session verdict: "Hire", "Borderline", or "No Hire", based on the aggregate score across all seven dimensions.
 6. THE Debrief SHALL include at least one specific, actionable improvement suggestion for the Candidate.
 7. WHERE the Candidate's solution contained JS_Pitfalls, THE Debrief SHALL list each pitfall detected and whether it was corrected during the session.
 8. WHEN the session was in Mock_Mode, THE Debrief SHALL include a time management note indicating whether the Candidate completed the solution within the allotted time.

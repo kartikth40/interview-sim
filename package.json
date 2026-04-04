@@ -5,10 +5,15 @@
   "type": "module",
   "scripts": {
     "test": "vitest --run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "export": "node src/scripts/export.js",
+    "daily": "node src/scripts/daily.js"
   },
   "devDependencies": {
     "fast-check": "^4.6.0",
     "vitest": "^4.1.2"
+  },
+  "dependencies": {
+    "pdfkit": "^0.18.0"
   }
 }

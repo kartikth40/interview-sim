@@ -1,0 +1,12 @@
+{
+  "name": "Post-Session Save Reminder",
+  "version": "1.1.0",
+  "description": "After agent stops, remind to save session replay (with elapsed time) and update weakness log if a debrief was just completed",
+  "when": {
+    "type": "agentStop"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Check if a DSA mock interview Debrief was just completed in this conversation. Look for the presence of a scorecard with the seven scoring dimensions (Approach Quality, Time/Space Complexity Accuracy, Edge Case Coverage, Communication & Fluency, Clarifying Questions Quality, Think_Aloud_Score, Code Narration Quality) and a verdict (Hire/Borderline/No Hire).\n\nIf a Debrief WAS completed:\n1. Check if `src/.session-timer.json` exists. If it does, read it and calculate elapsed time from `startMs` to `Date.now()`. Format as `Xm Ys` (e.g., '23m 45s'). Include this as 'Total Session Time: Xm Ys' in the session replay header and display it to the Candidate. Delete `src/.session-timer.json` after reading.\n2. Check if a session replay file was already written to `src/session-replays/`. If not, generate and save it now following the format in `.kiro/specs/dsa-mock-interviewer/ref/advanced-features.md` (including the Key Exchanges section). Include the total session time in the replay metadata.\n3. Check if the weakness log at `src/weakness-log.md` was already updated. If not, update it now — append entries for any dimension scored ≤3 or any communication anti-pattern detected. Follow the status progression rules (new/recurring/improving/resolved) from the advanced features reference.\n4. Delete `src/current-problem.md` if it still exists.\n5. Confirm to the Candidate: 'Session replay saved to [path]. Total time: [Xm Ys]. Weakness log updated.'\n\nIf NO Debrief was completed (e.g., the conversation was about something else, or the session was abandoned), do nothing — do not create any files or output any message."
+  }
+}

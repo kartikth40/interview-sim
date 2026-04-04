@@ -1,13 +1,13 @@
 # DSA Mock Interviewer
 
-A FAANG-level SDE-2 technical interview simulator powered by Kiro. Practice data structures and algorithms interviews with a Socratic-style AI interviewer that guides you through problems without giving away answers.
+A FAANG-level SDE-2 technical interview simulator that runs entirely inside Kiro. Practice data structures and algorithms interviews with a Socratic-style AI interviewer that challenges your thinking, catches your mistakes, and never gives away the answer.
 
 ## Getting Started
 
 ### Prerequisites
 
 - [Kiro IDE](https://kiro.dev)
-- Node.js (for running utility tests)
+- Node.js (ES Modules)
 
 ### Setup
 
@@ -17,62 +17,190 @@ npm install
 
 ### Start a Session
 
-Open this project in Kiro and start a chat. Provide a DSA problem (or ask the interviewer to pick one) and specify your mode:
+Trigger the **Start DSA Mock Interview** hook from the Kiro hooks panel. You'll get a single setup prompt with all options — reply with your choices or just say "go" for defaults.
 
-- **Practice Mode** — unlimited hints, proactive guidance when you're stuck, real-time anti-pattern flagging
-- **Mock Mode** — max 3 hints, no proactive help, strict scoring (simulates a real interview)
+**Quickstart example:**
+> Mock, DP, Google, Tough
 
-Example prompt:
+**All-defaults:**
+> go
 
-> Let's do a mock interview. Here's the problem: Given an array of integers `nums` and an integer `target`, return indices of the two numbers that add up to `target`.
+### Defaults
+
+| Option | Default |
+|--------|---------|
+| Mode | Mock |
+| Format | Single session |
+| Problem source | Interviewer-generated |
+| Company | Random |
+| Topic | Random |
+| Personality | Neutral |
+| Difficulty Progression | Off |
+| Timer (Mock only) | 35 min |
 
 ## Interview Phases
 
-Every session follows six sequential phases:
+Every session follows six sequential phases with visual banners and a progress tracker:
 
-1. **Clarification** — the interviewer asks clarifying questions about constraints and edge cases
-2. **Approach** — you describe your algorithm in plain language, discuss tradeoffs and complexity
-3. **Coding** — you write your solution in JavaScript while thinking aloud
-4. **Edge Case Challenge** — the interviewer presents edge cases one at a time for you to predict
-5. **Dry Run** — you trace through a test input step by step
-6. **Debrief** — full scorecard with verdict (Hire / Borderline / No Hire)
+```
+[🔍 Clarification] → [📝 Approach] → [💻 Coding] → [🧪 Edge Cases] → [🏃 Dry Run] → [📊 Debrief]
+```
+
+1. **Clarification** — interviewer asks clarifying questions about constraints and edge cases
+2. **Approach** — describe your algorithm, discuss tradeoffs and complexity
+3. **Coding** — write your solution with inline comments as think-aloud narration
+4. **Edge Cases** — *you* list edge cases your code should handle, interviewer verifies and nudges for misses
+5. **Dry Run** — trace through a test input step by step, stating variable values
+6. **Debrief** — full scorecard with collapsible sections and visual indicators
 
 ## Commands
 
-Use these during a session:
-
 | Command | What it does |
 |---------|-------------|
-| `!hint` | Get a Socratic nudge (progressive, no spoilers). Mock: max 3. Practice: unlimited. |
-| `!reveal` | Show the full optimal solution and skip to Debrief. |
-| `!restart` | Reset the session and start over. |
-| `!optimal` | Post-Debrief only. Step-by-step optimal walkthrough with divergence analysis. |
+| `!hint` | Socratic nudge (progressive). Mock: max 3. Practice: unlimited. |
+| `!reveal` | Show optimal solution, skip to Debrief. |
+| `!restart` | Reset session and start over. |
+| `!optimal` | Post-Debrief. Step-by-step optimal walkthrough + divergence analysis. |
+| `!recap` | Any time. Score heatmap, recent sessions, weaknesses, focus recommendation. |
 
 ## Debrief Scoring
 
-Six dimensions scored 1–5:
+Seven dimensions scored 1–5 with visual indicators (✅ ⚠️ ❌):
 
 | Dimension | What it evaluates |
 |-----------|-------------------|
 | Approach Quality | Strategy, efficiency, fit for constraints |
 | Complexity Accuracy | Correct time/space analysis |
-| Edge Case Coverage | Proactive consideration, prediction accuracy |
-| Communication Clarity | Clear, structured explanations |
+| Edge Case Coverage | Proactive identification, prediction accuracy, missed cases |
+| Communication & Fluency | Sentence structure, confidence, conciseness, technical vocabulary |
 | Clarifying Questions | Meaningful questions showing comprehension |
 | Think-Aloud | Verbalised tradeoffs, multiple strategies, reasoning |
+| Code Narration | Quality of inline comments used to narrate thinking |
 
-**Verdict:** Hire (avg ≥ 4.0, no dim below 3) · Borderline · No Hire (avg < 3.0 or ≥2 dims rated 1)
+**Verdict:** 🟢 Hire (avg ≥ 4.0, no dim below 3) · 🟡 Borderline · 🔴 No Hire (avg < 3.0 or ≥2 dims rated 1)
+
+The debrief uses collapsible sections — scorecard and verdict are always visible, details (communication tips, edge case analysis, pace report, pitfalls, anti-patterns, DSA pattern, improvement suggestions) expand on click.
+
+## Session Modes
+
+### Practice Mode
+- Unlimited hints
+- Proactive Socratic nudges when stuck (after 2 exchanges)
+- Anti-patterns flagged in real time
+- Collaborative edge case nudges (up to 2 per missed case)
+- Communication tips focused on learning
+
+### Mock Mode
+- Max 3 hints, strict pacing
+- No proactive help — you have to ask
+- Anti-patterns noted silently, reported in Debrief only
+- One nudge max per missed edge case
+- Timer with mid-session and 5-minute warnings
 
 ## Features
 
-- **JS Pitfall Detection** — flags common JavaScript mistakes during coding (assignment in conditions, missing declarations, off-by-one errors, parameter mutation, loose equality)
-- **Pace Coaching** — tracks time per phase against FAANG benchmarks
-- **Weakness Tracking** — identifies recurring weak areas across sessions
-- **Difficulty Progression** — adjusts problem difficulty (Easy/Medium/Hard) based on your performance
-- **Session Replay** — generates replay files for review
+### Interviewer Behavior
+- **Socratic style** — never gives answers, guides with questions
+- **Never blindly agrees** — independently verifies every claim before confirming
+- **Brief when you're right** — says "Correct." and moves on, no lecturing
+- **Challenges wrong claims** — constructs counterexamples instead of saying "that's wrong"
+- **JS pitfall detection** — flags 5 categories of common JS mistakes during coding
+- **Code narration** — expects inline comments as think-aloud (since you're coding in chat)
 
-## Running Tests
+### Tracking & Progression
+- **Weakness log** (`src/weakness-log.md`) — tracks weak areas with status progression: `new` → `recurring` → `improving` → `resolved` → `retest`
+- **Spaced repetition** — resolved weaknesses come back for re-testing after 3 sessions
+- **Difficulty progression** — adjusts Easy/Medium/Hard based on verdict + hint usage, with weakness-aware overrides
+- **Pace coaching** — tracks phase durations against FAANG benchmarks (Clarification 3–5m, Approach 5–8m, Coding 15–20m, Dry Run 3–5m)
+- **Score heatmap** — `!recap` shows a color-coded grid of all 7 dimensions across your last 5 sessions
 
+### Session Artifacts
+- **Session replays** (`src/session-replays/`) — includes key exchanges (verbatim moments that matter for learning)
+- **Problem file** (`src/current-problem.md`) — auto-created at session start with formatted problem statement and a notes section, auto-deleted after session
+- **PDF export** — shareable progress report with stats, tables, and color coding
+
+### Interviewer Personalities
+
+| Personality | Tone |
+|-------------|------|
+| Friendly | Warm, encouraging. "Great thinking!" |
+| Neutral | Professional, balanced. "That's correct." |
+| Tough | Direct, high-pressure. "Wrong. Fix it." |
+
+## CLI Scripts
+
+### Run Tests
 ```bash
-npx vitest --run
+npm test
 ```
+
+### Export Progress Report (PDF)
+```bash
+npm run export
+npm run export -- --sessions 5 --output my-report.pdf
+```
+Generates a styled PDF with hero stats, session history, problems solved, and weakness areas. Optimized for sharing on LinkedIn/X.
+
+### Daily Problem Suggestion
+```bash
+npm run daily
+npm run daily -- --new              # only unsolved problems
+npm run daily -- --topic DP         # force a topic
+npm run daily -- --new --topic Trees
+```
+Reads your weakness log and suggests a problem weighted toward your weakest topics. Includes a built-in bank of ~80 problems across 8 topics and 3 difficulties. Override with your own `src/scripts/problem-bank.json`.
+
+## Hooks
+
+Three agent hooks automate session lifecycle:
+
+| Hook | Trigger | What it does |
+|------|---------|-------------|
+| `start-mock-interview` | User-triggered | Collects session params in a single prompt, loads reference files, begins session |
+| `post-session-save` | Agent stop | Ensures session replay and weakness log are saved after every debrief |
+| `phase-pace-monitor` | Prompt submit | Silently counts exchanges per phase, nudges interviewer when a phase runs long |
+
+## Project Structure
+
+```
+src/
+├── interview-utils.js          # Core utility functions (validation, scoring, pacing, difficulty, replay)
+├── interview-utils.test.js     # Unit + property-based tests (fast-check)
+├── scripts/
+│   ├── export.js               # npm run export — PDF progress report
+│   ├── daily.js                # npm run daily — weakness-based problem suggestion
+│   └── problem-bank.json       # Custom problem bank (optional, user-maintained)
+├── session-replays/            # Session replay files (gitignored)
+├── weakness-log.md             # Weakness tracker (gitignored)
+├── current-problem.md          # Active problem during session (gitignored, auto-deleted)
+└── interview-report.pdf        # Exported report (gitignored)
+
+.kiro/
+├── steering/
+│   ├── dsa-interviewer.md      # Core interviewer persona, phases, scoring rules
+│   ├── structure.md            # Project structure reference
+│   ├── tech.md                 # Tech stack conventions
+│   └── product.md              # Product summary
+├── hooks/
+│   ├── start-mock-interview.kiro.hook
+│   ├── post-session-save.kiro.hook
+│   └── phase-pace-monitor.kiro.hook
+└── specs/dsa-mock-interviewer/
+    ├── requirements.md
+    ├── design.md
+    ├── tasks.md
+    └── ref/
+        ├── advanced-features.md
+        ├── company-profiles.md
+        └── multi-round.md
+```
+
+## Company Support
+
+50+ companies with tailored problem selection and evaluation emphasis:
+
+**Big Tech:** Google, Microsoft, Meta, Amazon, Apple
+**Product/Platform:** Adobe, Uber, Salesforce, LinkedIn, Airbnb, Atlassian, and more
+**Fintech:** Stripe, PayPal, Goldman Sachs, JP Morgan, Razorpay, Zerodha, and more
+**Indian Tech:** Flipkart, CRED, Zomato, PhonePe, Swiggy, Meesho, and more
+**Enterprise:** Oracle, VMware, Samsung, Walmart, Rubrik, and more
