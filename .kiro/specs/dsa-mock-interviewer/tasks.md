@@ -1,8 +1,8 @@
-# Implementation Plan: DSA Mock Interviewer
+# Implementation Plan: Interview Sim
 
 ## Overview
 
-This plan implements the DSA Mock Interviewer using IDE configuration files (Kiro steering/hooks and GitHub Copilot instructions/prompts) and utility functions for the deterministic correctness properties. All interviewer behaviour is defined in markdown configuration files. Utility functions extract the deterministic, computable logic identified in the design's correctness properties.
+This plan implements the Interview Sim using IDE configuration files (Kiro steering/hooks and GitHub Copilot instructions/prompts) and utility functions for the deterministic correctness properties. All interviewer behaviour is defined in markdown configuration files. Utility functions extract the deterministic, computable logic identified in the design's correctness properties.
 
 ## Tasks
 

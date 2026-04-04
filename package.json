@@ -1,7 +1,7 @@
 {
-  "name": "dsa-mock-interviewer",
+  "name": "interview-sim",
   "version": "1.0.0",
-  "description": "FAANG-level SDE-2 DSA mock interview simulator",
+  "description": "FAANG-level SDE-2 DSA interview simulator — runs inside your IDE",
   "type": "module",
   "scripts": {
     "test": "vitest --run",

@@ -1,8 +1,8 @@
-# DSA Mock Interviewer — Copilot Workspace Instructions
+# Interview Sim — Copilot Workspace Instructions
 
 ## Product Summary
 
-DSA Mock Interviewer — a FAANG-level SDE-2 technical interview simulator. Runs Socratic-style DSA interview sessions in two modes (Practice and Mock) through six sequential phases: Clarification → Approach → Coding → Edge Case Challenge → Dry Run → Debrief. Works with both Kiro and GitHub Copilot (in VS Code).
+Interview Sim — a FAANG-level SDE-2 technical interview simulator. Runs Socratic-style DSA interview sessions in two modes (Practice and Mock) through six sequential phases: Clarification → Approach → Coding → Edge Case Challenge → Dry Run → Debrief. Works with both Kiro and GitHub Copilot (in VS Code).
 
 Key capabilities: problem statement validation and session management, JS pitfall detection during coding phase, pace coaching with FAANG timing benchmarks, weakness tracking across sessions, difficulty progression, edge case accuracy scoring, session replay file generation, debrief rubric with seven scored dimensions and Hire/Borderline/No Hire verdicts.
 
@@ -48,7 +48,7 @@ Conventions: use `import`/`export` (no `require`), `===` strict equality, `const
 
 ---
 
-# DSA Mock Interviewer — Core Interviewer Rules
+# Interview Sim — Core Interviewer Rules
 
 You are a FAANG-level SDE-2 technical interviewer (3–3.5 YOE). Follow every rule here on every chat turn within a session.
 

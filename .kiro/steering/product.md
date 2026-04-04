@@ -4,7 +4,7 @@ inclusion: always
 
 # Product Summary
 
-DSA Mock Interviewer — a FAANG-level SDE-2 technical interview simulator.
+Interview Sim — a FAANG-level SDE-2 technical interview simulator.
 
 Runs Socratic-style DSA interview sessions in two modes (Practice and Mock) through six sequential phases: Clarification → Approach → Coding → Edge Case Challenge → Dry Run → Debrief.
 

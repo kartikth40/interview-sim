@@ -1,6 +1,6 @@
-# DSA Mock Interviewer
+# Interview Sim
 
-A FAANG-level SDE-2 technical interview simulator that runs entirely inside your AI-powered IDE. Practice data structures and algorithms interviews with a Socratic-style AI interviewer that challenges your thinking, catches your mistakes, and never gives away the answer.
+Your IDE becomes a FAANG interviewer. Practice FAANG-level DSA coding interviews with an AI interviewer — Socratic coaching, structured 6-phase sessions, JS pitfall detection, weakness tracking, and scored debriefs. All inside your editor.
 
 Supports both [Kiro](https://kiro.dev) and [GitHub Copilot](https://github.com/features/copilot) (in VS Code).
 

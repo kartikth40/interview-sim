@@ -370,7 +370,7 @@ function generatePDF(maxSessions, outputPath) {
     doc.switchToPage(i);
     doc.fontSize(8).fillColor(COLORS.gray)
       .text(
-        'DSA Mock Interviewer — FAANG-level SDE-2 interview simulator',
+        'Interview Sim — FAANG-level SDE-2 interview simulator',
         50, 780,
         { width: 495, align: 'center' },
       );

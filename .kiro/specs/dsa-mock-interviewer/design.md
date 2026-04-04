@@ -1,8 +1,8 @@
-# Design Document: DSA Mock Interviewer
+# Design Document: Interview Sim
 
 ## Overview
 
-The DSA Mock Interviewer transforms an AI-powered IDE's chat into a FAANG-level technical interviewer. It operates entirely within the IDE's chat interface using configuration files that define the interviewer persona and session rules.
+The Interview Sim transforms an AI-powered IDE's chat into a FAANG-level technical interviewer. It operates entirely within the IDE's chat interface using configuration files that define the interviewer persona and session rules.
 
 **In Kiro**, this uses two core primitives:
 1. A **steering file** (`.kiro/steering/dsa-interviewer.md`) that defines the Interviewer persona, session rules, phase logic, scoring rubrics, and all behavioural instructions — always active in Kiro chat.
