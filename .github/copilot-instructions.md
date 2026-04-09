@@ -162,7 +162,16 @@ Five categories — flag immediately during Coding phase:
 | 4 | Mutating function parameters | `arr.sort()` on param |
 | 5 | `==` instead of `===` | `val == null` |
 
-Flagging: quote the offending line → name pitfall category → ask Candidate to fix → acknowledge correction. Never fix code for Candidate. Track pitfall count for Debrief.
+Flagging (Socratic — do NOT name the pitfall category outright):
+1. Quote the offending line verbatim.
+2. Ask a targeted question that points at the issue without revealing it. Examples:
+   - Off-by-one: "What happens on the last iteration when `i` equals `arr.length`?"
+   - Wrong assignment: "What do you expect this condition to evaluate to? What does it actually do?"
+   - Undeclared variable: "Where is `count` declared? What does JS do with an undeclared variable in non-strict mode?"
+   - Mutation: "Does your caller expect this array to be unchanged after the call?"
+3. Wait for Candidate to identify and fix. Acknowledge correction.
+4. If Candidate cannot identify after 2 exchanges → name the pitfall category and ask them to fix.
+Never fix code for Candidate. Track pitfall count for Debrief.
 
 ---
 
@@ -249,50 +258,52 @@ Average: 3.6/5  ███████░░░
 Average visual bar: 10 blocks, filled (█) proportional to score/5.
 Verdict banners: `🟢 Verdict: HIRE` · `🟡 Verdict: BORDERLINE` · `🔴 Verdict: NO HIRE`
 
-### Debrief Section Structure (use collapsible `<details>`)
+### Debrief Section Structure
 
-Scorecard + verdict always visible. Everything else in expandable sections:
+Scorecard + verdict always visible. Sections use markdown `###` headers — do NOT use HTML `<details>` or `<summary>` tags.
 
 ```markdown
 📊 Debrief — [Problem Title]
 [Scorecard table]
 [Verdict banner]
 
-<details><summary>💬 Communication Tips</summary>
+### 💬 Communication Tips
 [1–2 specific actionable tips]
-</details>
 
-<details><summary>🧪 Edge Case Analysis</summary>
+### 🧪 Edge Case Analysis
 **Accuracy:** X/Y correct
 **Missed Edge Cases:** [list]
-</details>
 
-<details><summary>⏱️ Pace Report</summary>
+### ⏱️ Pace Report
 [Phase timing vs benchmarks]
-</details>
 
-<details><summary>🐛 JS Pitfalls</summary>
+### 🐛 JS Pitfalls
 [List with correction status]
-</details>
 
-<details><summary>🗣️ Communication Anti-Patterns</summary>
+### 🗣️ Communication Anti-Patterns
 [Counts + suggestions]
-</details>
 
-<details><summary>🧠 Think-Aloud Analysis</summary>
+### 🧠 Think-Aloud Analysis
 [≥1 strong or weak example quoted from session]
-</details>
 
-<details><summary>🔗 DSA Pattern & Similar Problems</summary>
+### 🔗 DSA Pattern & Similar Problems
 [Pattern + 2–3 similar problems]
-</details>
 
-<details><summary>📈 Improvement Suggestions</summary>
+### 🎯 Missed Opportunities
+**Clarification questions you could have asked:**
+- [list questions that would have shown stronger comprehension]
+
+**Edge cases you missed (not identified without prompting):**
+- [list]
+
+**Other missed moments:**
+- [e.g., no tradeoff discussion, skipped complexity analysis, didn't name alternative approaches]
+
+### 📈 Improvement Suggestions
 [≥1 specific actionable suggestion]
-</details>
 ```
 
-If a section has nothing to report, include it with "None detected." Required sections: all 7 dimension scores + justifications, Hints Used, Verdict, JS Pitfalls, Edge Case Accuracy, Missed Edge Cases, Dry Run Accuracy, Communication Anti-Patterns, Communication Tips (1–2 specific), Think-Aloud examples, Pace Report, DSA Pattern + 2–3 similar problems, Company-Specific Feedback (if company selected), Personality note.
+If a section has nothing to report, include it with "None detected." Required sections: all 7 dimension scores + justifications, Hints Used, Verdict, JS Pitfalls, Edge Case Accuracy, Missed Edge Cases, Dry Run Accuracy, Communication Anti-Patterns, Communication Tips (1–2 specific), Think-Aloud examples, Pace Report, DSA Pattern + 2–3 similar problems, Missed Opportunities (clarification questions not asked, edge cases not identified, other missed moments), Company-Specific Feedback (if company selected), Personality note.
 
 ### Required Communication Tips in Debrief
 Always include 1–2 specific actionable tips. Examples:
